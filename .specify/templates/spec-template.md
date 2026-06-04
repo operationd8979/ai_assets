@@ -8,6 +8,10 @@
 
 **Input**: User description: "$ARGUMENTS"
 
+**Feature Type**: [API / Angular UI / Full-stack / Library / Other]
+
+**Primary Stack(s)**: [.NET API / Angular / Other - list all that apply]
+
 ## User Scenarios & Testing *(mandatory)*
 
 <!--
@@ -71,18 +75,19 @@
 ### Edge Cases
 
 <!--
-  ACTION REQUIRED: The content in this section represents placeholders.
-  Fill them out with the right edge cases.
+  ACTION REQUIRED: Replace these placeholders with edge cases relevant to the selected stack(s).
+  Include API validation and error cases for backend features.
+  Include UI states, async loading, empty states, browser behavior, and accessibility cases for Angular features.
 -->
 
 - What happens when [boundary condition]?
-- How does system handle [error scenario]?
+- How does the system handle [error scenario]?
 
 ## Requirements *(mandatory)*
 
 <!--
-  ACTION REQUIRED: The content in this section represents placeholders.
-  Fill them out with the right functional requirements.
+  ACTION REQUIRED: Replace the content in this section with the right functional requirements.
+  Requirements must describe product behavior, not framework implementation details.
 -->
 
 ### Functional Requirements
@@ -120,9 +125,7 @@
 ## Assumptions
 
 <!--
-  ACTION REQUIRED: The content in this section represents placeholders.
-  Fill them out with the right assumptions based on reasonable defaults
-  chosen when the feature description did not specify certain details.
+  ACTION REQUIRED: Fill this section with explicit defaults chosen when the feature description did not specify details.
 -->
 
 - [Assumption about target users, e.g., "Users have stable internet connectivity"]
@@ -130,34 +133,39 @@
 - [Assumption about data/environment, e.g., "Existing authentication system will be reused"]
 - [Dependency on existing system/service, e.g., "Requires access to the existing user profile API"]
 
-## API Contracts *(mandatory for all API features)*
+## Contracts & Interfaces *(mandatory)*
 
 <!--
-  Define one block per endpoint. This section is the single source of truth for:
-  - xUnit test assertions (exact request/response matching)
-  - Fixture JSON file content
-  - Frontend integration contracts
+  This section is the single source of truth for externally visible behavior.
+  Fill only the blocks that apply to this feature type. Delete unused blocks before committing.
 
-  Copy and fill the block below for each endpoint. Delete placeholder comments before committing.
+  API features: define exact HTTP contracts.
+  Angular UI features: define routes, user-visible states, component inputs/outputs, and service dependencies.
+  Full-stack features: define both API and UI contracts plus how the UI consumes the API.
 -->
 
-### `[METHOD] /api/[controller]/[route]`
+### API Contract *(for API or full-stack features)*
 
-**Auth required**: Yes — Bearer JWT / No
+#### `[METHOD] /api/[resource]/[route]`
 
-**Path params**: `{paramName}` (string, required) — description
+**Auth required**: Yes - [auth scheme] / No
 
-**Query params**: `?param` (type, optional) — description / N/A
+**Path params**: `{paramName}` (type, required) - description / N/A
+
+**Query params**: `?param` (type, optional) - description / N/A
 
 **Request body**:
+
 ```json
 {
-  "field": "type — description"
+  "field": "type - description"
 }
 ```
-*(N/A for GET requests)*
 
-**Response 200**:
+*(N/A for requests without a body)*
+
+**Success response**:
+
 ```json
 {
   "field": "value"
@@ -165,36 +173,81 @@
 ```
 
 **Error responses**:
+
 | Status | Condition | Response body |
 |--------|-----------|---------------|
-| 400 | Invalid input | `{"error": "description"}` |
-| 401 | Unauthenticated | *(empty)* |
-| 404 | Resource not found | `{"error": "description"}` |
-| 500 | Unexpected server error | `{"error": "An unexpected error occurred."}` |
+| [status] | [condition] | `[body or N/A]` |
 
-**Fixture files**:
-- `src/SCCVision.API.Authorization.Tests/Fixtures/[FeatureName]/[scenario]-request.json`
-- `src/SCCVision.API.Authorization.Tests/Fixtures/[FeatureName]/[scenario]-response.json`
+**Test data files**:
 
-**Breaking change**: No / Yes — migration: [describe migration path]
+- `[path/to/feature]/test-data/[scenario]-request.json`
+- `[path/to/feature]/test-data/[scenario]-response.json`
+
+**Breaking change**: No / Yes - migration: [describe migration path]
 
 ---
 
-*[Duplicate the block above for each additional endpoint in this feature]*
+### Angular UI Contract *(for Angular UI or full-stack features)*
+
+**Route(s)**: `[path]` - [purpose and navigation entry point]
+
+**Primary component/view**: `[ComponentName]` - [responsibility]
+
+**Inputs**: `[inputName]` (type, required/optional) - description / N/A
+
+**Outputs/events**: `[eventName]` (payload type) - description / N/A
+
+**Service/API dependencies**: `[service or endpoint]` - [expected contract and failure behavior]
+
+**User-visible states**:
+
+| State | Trigger | Expected UI behavior |
+|-------|---------|----------------------|
+| Loading | [trigger] | [spinner/skeleton/disabled controls/etc.] |
+| Empty | [trigger] | [empty state content and available actions] |
+| Error | [trigger] | [message, retry behavior, and focus/announcement behavior] |
+| Success | [trigger] | [rendered data and next action] |
+
+**Accessibility/responsive requirements**:
+
+- Keyboard access: [required focus order and key behavior]
+- Screen reader behavior: [labels, live regions, announcements]
+- Responsive behavior: [mobile/tablet/desktop expectations]
+
+**Breaking change**: No / Yes - migration: [describe migration path]
+
+---
+
+### Integration Contract *(for cross-system or full-stack features)*
+
+**Producer**: [system/component/API]
+
+**Consumer**: [system/component/API/UI]
+
+**Data exchanged**: [schema, event, route params, query params, or payload]
+
+**Failure handling**: [retry, fallback, error state, logging, or user message]
+
+**Compatibility requirements**: [versioning, backward compatibility, feature flags, rollout]
 
 ## Test Coverage *(mandatory)*
 
 <!--
   One row per Acceptance Scenario defined above.
   Keep this table updated whenever contracts or scenarios change.
-  Status: ☐ = not yet implemented, ✓ = passing, ✗ = failing
+  Status: [ ] = not yet implemented, [x] = passing, [!] = failing/blocking
+
+  Test type must match the selected stack:
+  - API: contract/integration test, unit test, authorization test
+  - Angular: component test, service test, route test, accessibility/responsive check
+  - Full-stack: API contract test plus UI integration/component test
 -->
 
-| # | Scenario | Fixture file | xUnit test method | Status |
-|---|----------|--------------|-------------------|--------|
-| 1 | Happy path — [describe] | `Fixtures/[Feature]/[scenario]-response.json` | `[MethodName]_Returns[Expected]` | ☐ |
-| 2 | [Edge case — describe] | `Fixtures/[Feature]/[scenario]-response.json` | `[MethodName]_When[Condition]_Returns[Expected]` | ☐ |
-| 3 | Invalid input | N/A | `[MethodName]_WithInvalidInput_Returns400` | ☐ |
-| 4 | Unauthenticated | N/A | `[MethodName]_WithoutAuth_Returns401` | ☐ |
+| # | Scenario | Contract/interface covered | Test type | Test file or command | Status |
+|---|----------|----------------------------|-----------|----------------------|--------|
+| 1 | Happy path - [describe] | [API endpoint or UI contract] | [test type] | `[path or command]` | [ ] |
+| 2 | Edge case - [describe] | [API endpoint or UI contract] | [test type] | `[path or command]` | [ ] |
+| 3 | Invalid input or invalid state | [API endpoint or UI contract] | [test type] | `[path or command]` | [ ] |
+| 4 | Unauthorized or unavailable dependency | [API endpoint or UI contract] | [test type] | `[path or command]` | [ ] |
 
-*Add a row for every Acceptance Scenario in the User Stories section. The xUnit test method name MUST match exactly what is implemented in `ContractTests.cs`.*
+*Add a row for every Acceptance Scenario in the User Stories section. Test names and file paths MUST match the implementation plan and tasks.*

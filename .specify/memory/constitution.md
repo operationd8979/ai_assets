@@ -1,42 +1,46 @@
-# SCCVision Authorization API Constitution
+# Specification Base Constitution
 
 ## Core Principles
 
-### I. Contract-First (NON-NEGOTIABLE)
-Every API endpoint MUST have a contract defined in the feature's `spec.md` under the `## API Contracts` section BEFORE implementation begins. The contract MUST include: HTTP method + route, auth requirements, request schema, response schema for every status code, error response table, and the fixture file paths that will back the tests. No task for implementing an endpoint may begin until its contract is fully defined and reviewed.
+### I. Contract-First Interfaces (NON-NEGOTIABLE)
 
-### II. Fixture-Driven Testing (NON-NEGOTIABLE)
-All mock/test data lives in `src/SCCVision.API.Authorization.Tests/Fixtures/{FeatureName}/` as JSON files. Test code MUST NOT inline request or response data — it MUST load from fixture files. When a contract changes, the corresponding fixture file MUST be updated first, before any code changes. This ensures the fixture directory is the single source of truth for expected API behavior.
+Every externally visible behavior MUST be specified before implementation begins. API features MUST define HTTP method, route, auth, request schema, success response, error responses, and compatibility impact. Angular UI features MUST define routes, user-visible states, component/service boundaries, accessibility expectations, responsive behavior, and API/service dependencies. Full-stack features MUST define both API and UI contracts plus how the UI consumes the API. No implementation task may begin until the relevant contract/interface is complete and reviewed.
 
-### III. Tests Bắt Buộc — TDD (NON-NEGOTIABLE)
-Tests are REQUIRED for every feature, not optional. Every Acceptance Scenario in `spec.md` MUST have a corresponding xUnit test in `ContractTests.cs`. Workflow is strictly: write failing test → get review → implement → test passes. The `## Test Coverage` table in `spec.md` MUST be kept up to date at all times. `dotnet test` passing is a hard CI gate — PRs that fail tests are blocked.
+### II. Stack-Aware Test Data and Mocks (NON-NEGOTIABLE)
+
+All test data, mocks, and fixtures MUST live in the project-approved location declared by `plan.md`. API tests SHOULD load request/response examples from shared test data when exact payload behavior matters. Angular tests SHOULD use shared mocks, test providers, or builders for services, route data, and async UI states. When a contract or UI state changes, update the corresponding test data/mocks before implementation.
+
+### III. Tests Required - TDD (NON-NEGOTIABLE)
+
+Tests are REQUIRED for every feature. Every Acceptance Scenario in `spec.md` MUST have a stack-appropriate automated test or an explicitly documented manual check when automation is not feasible. API features require backend contract/integration coverage for externally visible behavior. Angular UI features require Karma/Jasmine coverage through `ng test` for component, service, route, and state behavior as applicable. Workflow is strictly: write failing test/check -> review -> implement -> test passes. The `## Test Coverage` table in `spec.md` MUST remain current.
 
 ### IV. Simplicity (YAGNI)
-This is a thin API: Azure App Configuration → Feature Management → HTTP response. Do NOT add unnecessary layers. Repository pattern, CQRS, mediator, and similar patterns are prohibited unless a concrete problem demands them and the violation is documented in the `Complexity Tracking` section of `plan.md`. Controllers call services or Azure SDK directly.
 
-### V. Versioning & Breaking Changes
-Breaking changes to existing endpoints require a deprecation period. The old endpoint MUST return `410 Gone` with a JSON body containing a `migrationUrl` or `message` field pointing to the new endpoint. Major version bumps use route versioning (`/api/v2/`). Minor non-breaking additions do not require a new version. Every breaking change MUST be flagged in the `**Breaking change**` field of the API Contracts section in `spec.md`.
+Choose the simplest structure that fits the feature and existing project conventions. Do NOT add new layers, state-management libraries, backend abstractions, UI frameworks, generated clients, shared packages, or cross-cutting infrastructure unless a concrete problem demands them and the violation is documented in `plan.md` Complexity Tracking. Existing project patterns are preferred over new abstractions.
 
-## Technology Stack
+### V. Versioning, Compatibility, and Breaking Changes
 
-- **Runtime**: .NET 9, ASP.NET Core Web API
-- **Feature Flags**: Microsoft.FeatureManagement + Azure App Configuration
-- **Auth**: Microsoft.Identity.Web (Azure AD / JWT Bearer)
-- **Testing**: xUnit, Microsoft.AspNetCore.Mvc.Testing (WebApplicationFactory)
-- **Test data**: JSON fixture files in `Tests/Fixtures/`
-- **CI**: Azure Pipelines — `dotnet test` is a required passing gate
+Breaking changes require explicit migration or compatibility notes. API breaking changes MUST document route/version behavior, response changes, client impact, and migration path. Angular breaking changes MUST document changed routes, component inputs/outputs, navigation behavior, user-visible workflow impact, and migration path. Full-stack breaking changes MUST document both API and UI compatibility.
+
+## Technology Stack Policy
+
+- **Backend**: Use the existing backend runtime, package conventions, project layout, auth, configuration, and CI commands unless `plan.md` justifies a change.
+- **Angular UI**: Use the existing Angular workspace conventions, routing style, component style, styling approach, and Karma/Jasmine test setup unless `plan.md` justifies a change.
+- **Full-stack**: Stabilize API contracts before wiring Angular services to new or changed backend behavior.
+- **Testing**: Use stack-specific commands from `quickstart.md`; Angular Karma/Jasmine features use `ng test --watch=false --browsers=ChromeHeadless` for CI-style validation.
+- **CI**: Pull requests are blocked when any required stack-specific build or test command fails.
 
 ## Development Workflow
 
-1. `spec.md` written with `## API Contracts` and `## Test Coverage` sections complete
-2. Fixture JSON files created in `Tests/Fixtures/{FeatureName}/`
-3. xUnit tests written and confirmed FAILING
-4. Implementation written until tests pass
-5. `dotnet test` run locally before PR
-6. PR blocked if CI fails
+1. Write `spec.md` with feature type, stack, contracts/interfaces, success criteria, assumptions, and Test Coverage complete.
+2. Write `plan.md` with technical context, project structure, validation commands, and Constitution Check.
+3. Create or update contracts, test data, mocks, and failing tests before implementation.
+4. Implement the smallest change that satisfies the failing tests and acceptance scenarios.
+5. Run stack-specific validation commands locally before PR.
+6. Document complexity, compatibility, or testing exceptions in `plan.md`.
 
 ## Governance
 
-This constitution supersedes all other practices. Violations must be documented in the `Complexity Tracking` section of `plan.md` with justification. All PRs and spec reviews must verify compliance with Principles I–V. Amendments to this constitution require a note in the `## Governance` section with date and rationale.
+This constitution supersedes conflicting generated guidance. All spec, plan, task, checklist, and PR reviews must verify compliance with Principles I-V. Violations must be documented in `plan.md` Complexity Tracking with rationale and the simpler alternative that was rejected. Amendments require a version bump, date, and rationale.
 
-**Version**: 1.0.0 | **Ratified**: 2026-06-03 | **Last Amended**: 2026-06-03
+**Version**: 1.1.0 | **Ratified**: 2026-06-03 | **Last Amended**: 2026-06-04

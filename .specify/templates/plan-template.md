@@ -13,34 +13,37 @@
 ## Technical Context
 
 <!--
-  ACTION REQUIRED: Replace the content in this section with the technical details
-  for the project. The structure here is presented in advisory capacity to guide
-  the iteration process.
+  ACTION REQUIRED: Replace placeholders with the technical details for this feature.
+  Use the selected stack(s) from spec.md. Delete stack rows and structure examples that do not apply.
 -->
 
-**Language/Version**: .NET 9, C# 13
+**Feature Type**: [API / Angular UI / Full-stack / Library / Other]
 
-**Primary Dependencies**: Microsoft.FeatureManagement.AspNetCore, Azure.Identity, Microsoft.Identity.Web, Microsoft.AspNetCore.Mvc.Testing
+**Backend Stack**: [.NET version + C# version / N/A / Other]
 
-**Storage**: N/A — stateless API, configuration sourced from Azure App Configuration
+**Frontend Stack**: [Angular version + TypeScript version / N/A / Other]
 
-**Testing**: xUnit + WebApplicationFactory (integration/contract tests), xUnit standalone (unit tests)
+**Primary Dependencies**: [backend packages, Angular libraries, shared SDKs, auth clients]
 
-**Target Platform**: Linux container (Docker), Azure App Service / Azure Static Web Apps
+**Storage/State**: [database, browser storage, server cache, client state, N/A]
 
-**Project Type**: ASP.NET Core Web API — thin delegation layer to Azure App Configuration
+**Testing**: [backend test framework and command; Angular Karma/Jasmine via `ng test`; E2E tool if required]
 
-**Performance Goals**: p95 < 200ms for feature flag checks
+**Target Platform**: [Linux container, browser support matrix, Azure App Service, Azure Static Web Apps, etc.]
 
-**Constraints**: No database, no local state. Auth via Azure AD JWT Bearer. Config via Azure App Configuration with 5-min refresh interval (configurable).
+**Project Type**: [.NET API / Angular app / Full-stack / Library]
 
-**Scale/Scope**: [number of frontend clients or NEEDS CLARIFICATION]
+**Performance Goals**: [API latency, UI render budget, bundle budget, interaction budget, or N/A]
+
+**Constraints**: [auth, configuration, browser support, no local state, accessibility, deployment constraints]
+
+**Scale/Scope**: [users, routes, components, endpoints, clients, or NEEDS CLARIFICATION]
 
 ## Constitution Check
 
 *GATE: Must pass before Phase 0 research. Re-check after Phase 1 design.*
 
-[Gates determined based on constitution file]
+[Gates determined based on constitution file. Include stack-specific gates for contracts, tests, simplicity, and CI commands.]
 
 ## Project Structure
 
@@ -58,27 +61,72 @@ specs/[###-feature]/
 
 ### Source Code (repository root)
 
+<!--
+  ACTION REQUIRED: Replace with actual paths for the selected stack(s).
+  Keep only the relevant structure. Do not generate files in paths that do not exist unless the plan explicitly creates them.
+-->
+
+#### .NET API structure *(if applicable)*
+
 ```text
-src/SCCVision.API.Authorization/
-├── Controllers/
-│   └── [FeatureName]Controller.cs          # new controller (if applicable)
-├── HttpContextTargetingContextAccessor.cs
+src/[ApiProject]/
+├── Controllers/ or Endpoints/
+├── Models/ or Contracts/
+├── Services/
 └── Program.cs
 
-src/SCCVision.API.Authorization.Tests/
-├── Fixtures/                               # mock data — single source of truth
-│   └── [FeatureName]/
-│       ├── [scenario]-request.json         # exact request body per contract
-│       └── [scenario]-response.json        # exact expected response per contract
-├── Contracts/                              # contract tests — assert exact request/response match
-│   └── [FeatureName]ContractTests.cs
-└── Unit/                                   # unit tests for isolated logic
-    └── [FeatureName]Tests.cs
+tests/[ApiProject].Tests/
+├── TestData/[FeatureName]/
+├── Contracts/
+└── Unit/
 ```
 
-**Fixture files are defined in `spec.md → ## API Contracts → Fixture files` and copied here during the test-writing task.**
+#### Angular UI structure *(if applicable)*
 
-**Structure Decision**: Single .NET solution with API project + Tests project. No additional layers unless justified in Complexity Tracking.
+```text
+src/app/[feature]/
+├── [feature].routes.ts
+├── [feature].component.ts
+├── [feature].component.html
+├── [feature].component.scss
+├── [feature].component.spec.ts
+├── [feature].service.ts
+└── [feature].service.spec.ts
+```
+
+#### Full-stack structure *(if applicable)*
+
+```text
+src/[ApiProject]/                  # Backend API contracts and implementation
+tests/[ApiProject].Tests/          # Backend tests and test data
+src/app/[feature]/                 # Angular route, component, service, and tests
+```
+
+**Test Data Decision**: [Where request/response JSON, UI fixtures, mocks, or builders live. Must match spec.md contracts.]
+
+**Structure Decision**: [Chosen structure and why it is the simplest fit for this feature. Document any additional layer in Complexity Tracking.]
+
+## Phase 0: Research
+
+<!--
+  Resolve unknowns before design. Prefer facts from existing code/config over assumptions.
+-->
+
+- [ ] Identify existing project conventions for the selected stack(s)
+- [ ] Confirm test runner commands and CI-compatible flags
+- [ ] Confirm auth, configuration, routing, and state-management patterns
+- [ ] Document decisions in `research.md`
+
+## Phase 1: Design
+
+<!--
+  Produce implementation-ready design artifacts.
+-->
+
+- [ ] Define contracts/interfaces in `contracts/` and keep them aligned with `spec.md`
+- [ ] Define data model, DTOs, view models, or component state in `data-model.md`
+- [ ] Define quickstart validation commands in `quickstart.md`
+- [ ] Re-run Constitution Check after design
 
 ## Complexity Tracking
 
@@ -86,5 +134,5 @@ src/SCCVision.API.Authorization.Tests/
 
 | Violation | Why Needed | Simpler Alternative Rejected Because |
 |-----------|------------|-------------------------------------|
-| [e.g., 4th project] | [current need] | [why 3 projects insufficient] |
-| [e.g., Repository pattern] | [specific problem] | [why direct DB access insufficient] |
+| [e.g., extra layer/project/library] | [current need] | [why the simpler structure is insufficient] |
+| [e.g., new state-management library] | [specific problem] | [why existing patterns are insufficient] |
