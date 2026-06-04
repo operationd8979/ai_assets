@@ -1,0 +1,4 @@
+interface:
+  display_name: "Spec Kit Checklist"
+  short_description: "Help with Spec Kit Checklist workflows"
+  default_prompt: "Use $speckit-checklist for this Spec Kit workflow."

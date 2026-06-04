@@ -1,0 +1,4 @@
+interface:
+  display_name: "Spec Kit Clarify"
+  short_description: "Help with Spec Kit Clarify workflows"
+  default_prompt: "Use $speckit-clarify for this Spec Kit workflow."

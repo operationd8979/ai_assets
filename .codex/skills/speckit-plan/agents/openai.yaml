@@ -1,0 +1,4 @@
+interface:
+  display_name: "Spec Kit Plan"
+  short_description: "Help with Spec Kit Plan workflows"
+  default_prompt: "Use $speckit-plan for this Spec Kit workflow."

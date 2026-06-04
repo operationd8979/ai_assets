@@ -1,0 +1,4 @@
+interface:
+  display_name: "Spec Kit Agent Context Update"
+  short_description: "Help with Spec Kit Agent Context Update workflows"
+  default_prompt: "Use $speckit-agent-context-update for this Spec Kit workflow."

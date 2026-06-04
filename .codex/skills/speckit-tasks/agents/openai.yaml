@@ -1,0 +1,4 @@
+interface:
+  display_name: "Spec Kit Tasks"
+  short_description: "Help with Spec Kit Tasks workflows"
+  default_prompt: "Use $speckit-tasks for this Spec Kit workflow."

@@ -1,0 +1,4 @@
+interface:
+  display_name: "Spec Kit Implement"
+  short_description: "Help with Spec Kit Implement workflows"
+  default_prompt: "Use $speckit-implement for this Spec Kit workflow."

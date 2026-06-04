@@ -1,0 +1,4 @@
+interface:
+  display_name: "Spec Kit Analyze"
+  short_description: "Help with Spec Kit Analyze workflows"
+  default_prompt: "Use $speckit-analyze for this Spec Kit workflow."

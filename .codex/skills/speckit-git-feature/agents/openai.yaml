@@ -1,0 +1,4 @@
+interface:
+  display_name: "Spec Kit Git Feature"
+  short_description: "Help with Spec Kit Git Feature workflows"
+  default_prompt: "Use $speckit-git-feature for this Spec Kit workflow."

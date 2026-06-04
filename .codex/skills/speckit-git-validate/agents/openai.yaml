@@ -1,0 +1,4 @@
+interface:
+  display_name: "Spec Kit Git Validate"
+  short_description: "Help with Spec Kit Git Validate workflows"
+  default_prompt: "Use $speckit-git-validate for this Spec Kit workflow."

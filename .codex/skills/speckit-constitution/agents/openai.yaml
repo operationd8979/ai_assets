@@ -1,0 +1,4 @@
+interface:
+  display_name: "Spec Kit Constitution"
+  short_description: "Help with Spec Kit Constitution workflows"
+  default_prompt: "Use $speckit-constitution for this Spec Kit workflow."

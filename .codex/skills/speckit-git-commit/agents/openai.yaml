@@ -1,0 +1,4 @@
+interface:
+  display_name: "Spec Kit Git Commit"
+  short_description: "Help with Spec Kit Git Commit workflows"
+  default_prompt: "Use $speckit-git-commit for this Spec Kit workflow."

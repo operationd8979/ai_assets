@@ -1,0 +1,4 @@
+interface:
+  display_name: "Spec Kit Specify"
+  short_description: "Help with Spec Kit Specify workflows"
+  default_prompt: "Use $speckit-specify for this Spec Kit workflow."

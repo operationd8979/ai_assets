@@ -1,0 +1,4 @@
+interface:
+  display_name: "Spec Kit Git Remote"
+  short_description: "Help with Spec Kit Git Remote workflows"
+  default_prompt: "Use $speckit-git-remote for this Spec Kit workflow."
