@@ -28,6 +28,7 @@ spec_kit_effective_branch_name() {
 check_feature_branch() {
     local raw="$1"
     local has_git_repo="$2"
+    local repo_root="${3:-$(pwd)}"
 
     # For non-git repos, we can't enforce branch naming but still provide output
     if [[ "$has_git_repo" != "true" ]]; then
@@ -47,6 +48,12 @@ check_feature_branch() {
     if [[ "$is_sequential" != "true" ]] && [[ ! "$branch" =~ ^[0-9]{8}-[0-9]{6}- ]]; then
         echo "ERROR: Not on a feature branch. Current branch: $raw" >&2
         echo "Feature branches should be named like: 001-feature-name, 1234-feature-name, or 20260319-143022-feature-name" >&2
+        return 1
+    fi
+
+    if [[ ! -d "$repo_root/specs/$branch" ]]; then
+        echo "ERROR: No exact spec directory found for branch '$branch'." >&2
+        echo "Expected: specs/$branch" >&2
         return 1
     fi
 

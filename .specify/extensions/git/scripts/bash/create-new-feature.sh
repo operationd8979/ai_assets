@@ -73,11 +73,14 @@ while [ $i -le $# ]; do
             echo ""
             echo "Environment variables:"
             echo "  GIT_BRANCH_NAME     Use this exact branch name, bypassing all prefix/suffix generation"
+            echo "  SPECIFY_FEATURE_DIRECTORY"
+            echo "                      Use the basename of this spec directory as the branch name when GIT_BRANCH_NAME is not set"
             echo ""
             echo "Examples:"
             echo "  $0 'Add user authentication system' --short-name 'user-auth'"
             echo "  $0 'Implement OAuth2 integration for API' --number 5"
             echo "  $0 --timestamp --short-name 'user-auth' 'Add user authentication'"
+            echo "  SPECIFY_FEATURE_DIRECTORY=specs/001-user-auth $0 'feature description'"
             echo "  GIT_BRANCH_NAME=my-branch $0 'feature description'"
             exit 0
             ;;
@@ -302,9 +305,23 @@ generate_branch_name() {
     fi
 }
 
-# Check for GIT_BRANCH_NAME env var override (exact branch name, no prefix/suffix)
+EXACT_BRANCH_NAME=""
 if [ -n "${GIT_BRANCH_NAME:-}" ]; then
-    BRANCH_NAME="$GIT_BRANCH_NAME"
+    EXACT_BRANCH_NAME="$GIT_BRANCH_NAME"
+elif [ -n "${SPECIFY_FEATURE_DIRECTORY:-}" ]; then
+    SPEC_DIR_PATH="${SPECIFY_FEATURE_DIRECTORY%/}"
+    SPEC_DIR_PATH="${SPEC_DIR_PATH%\\}"
+    SPEC_DIR_PATH="${SPEC_DIR_PATH//\\//}"
+    EXACT_BRANCH_NAME="$(basename "$SPEC_DIR_PATH")"
+    if [ -z "$EXACT_BRANCH_NAME" ] || [ "$EXACT_BRANCH_NAME" = "." ] || [ "$EXACT_BRANCH_NAME" = "/" ]; then
+        >&2 echo "Error: SPECIFY_FEATURE_DIRECTORY must include a feature directory name."
+        exit 1
+    fi
+fi
+
+# Check for exact branch name overrides (no prefix/suffix generation)
+if [ -n "$EXACT_BRANCH_NAME" ]; then
+    BRANCH_NAME="$EXACT_BRANCH_NAME"
     # Extract FEATURE_NUM from the branch name if it starts with a numeric prefix
     # Check timestamp pattern first (YYYYMMDD-HHMMSS-) since it also matches the simpler ^[0-9]+ pattern
     if echo "$BRANCH_NAME" | grep -Eq '^[0-9]{8}-[0-9]{6}-'; then
@@ -359,8 +376,8 @@ fi
 MAX_BRANCH_LENGTH=244
 _byte_length() { printf '%s' "$1" | LC_ALL=C wc -c | tr -d ' '; }
 BRANCH_BYTE_LEN=$(_byte_length "$BRANCH_NAME")
-if [ -n "${GIT_BRANCH_NAME:-}" ] && [ "$BRANCH_BYTE_LEN" -gt $MAX_BRANCH_LENGTH ]; then
-    >&2 echo "Error: GIT_BRANCH_NAME must be 244 bytes or fewer in UTF-8. Provided value is ${BRANCH_BYTE_LEN} bytes."
+if [ -n "$EXACT_BRANCH_NAME" ] && [ "$BRANCH_BYTE_LEN" -gt $MAX_BRANCH_LENGTH ]; then
+    >&2 echo "Error: Exact branch name overrides must be 244 bytes or fewer in UTF-8. Provided value is ${BRANCH_BYTE_LEN} bytes."
     exit 1
 elif [ "$BRANCH_BYTE_LEN" -gt $MAX_BRANCH_LENGTH ]; then
     PREFIX_LENGTH=$(( ${#FEATURE_NUM} + 1 ))

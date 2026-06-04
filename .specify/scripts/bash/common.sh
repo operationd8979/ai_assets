@@ -128,6 +128,7 @@ spec_kit_effective_branch_name() {
 check_feature_branch() {
     local raw="$1"
     local has_git_repo="$2"
+    local repo_root="${3:-$(get_repo_root)}"
 
     # For non-git repos, we can't enforce branch naming but still provide output
     if [[ "$has_git_repo" != "true" ]]; then
@@ -147,6 +148,12 @@ check_feature_branch() {
     if [[ "$is_sequential" != "true" ]] && [[ ! "$branch" =~ ^[0-9]{8}-[0-9]{6}- ]]; then
         echo "ERROR: Not on a feature branch. Current branch: $raw" >&2
         echo "Feature branches should be named like: 001-feature-name, 1234-feature-name, or 20260319-143022-feature-name" >&2
+        return 1
+    fi
+
+    if [[ ! -d "$repo_root/specs/$branch" ]]; then
+        echo "ERROR: No exact spec directory found for branch '$branch'." >&2
+        echo "Expected: specs/$branch" >&2
         return 1
     fi
 
@@ -186,7 +193,7 @@ read_feature_json_feature_directory() {
 }
 
 # Returns 0 when .specify/feature.json lists feature_directory that exists as a directory
-# and matches the resolved active FEATURE_DIR (so /speckit.plan can skip git branch pattern checks).
+# and matches the resolved active FEATURE_DIR (so /speckit-plan can skip git branch pattern checks).
 # Delegates parsing to read_feature_json_feature_directory, which is safe under `set -e`.
 feature_json_matches_feature_dir() {
     local repo_root="$1"
@@ -206,49 +213,14 @@ feature_json_matches_feature_dir() {
     [[ "$norm_json" == "$norm_active" ]]
 }
 
-# Find feature directory by numeric prefix instead of exact branch match
-# This allows multiple branches to work on the same spec (e.g., 004-fix-bug, 004-add-feature)
-find_feature_dir_by_prefix() {
+# Find feature directory by exact branch name.
+find_feature_dir_by_branch() {
     local repo_root="$1"
     local branch_name
     branch_name=$(spec_kit_effective_branch_name "$2")
     local specs_dir="$repo_root/specs"
 
-    # Extract prefix from branch (e.g., "004" from "004-whatever" or "20260319-143022" from timestamp branches)
-    local prefix=""
-    if [[ "$branch_name" =~ ^([0-9]{8}-[0-9]{6})- ]]; then
-        prefix="${BASH_REMATCH[1]}"
-    elif [[ "$branch_name" =~ ^([0-9]{3,})- ]]; then
-        prefix="${BASH_REMATCH[1]}"
-    else
-        # If branch doesn't have a recognized prefix, fall back to exact match
-        echo "$specs_dir/$branch_name"
-        return
-    fi
-
-    # Search for directories in specs/ that start with this prefix
-    local matches=()
-    if [[ -d "$specs_dir" ]]; then
-        for dir in "$specs_dir"/"$prefix"-*; do
-            if [[ -d "$dir" ]]; then
-                matches+=("$(basename "$dir")")
-            fi
-        done
-    fi
-
-    # Handle results
-    if [[ ${#matches[@]} -eq 0 ]]; then
-        # No match found - return the branch name path (will fail later with clear error)
-        echo "$specs_dir/$branch_name"
-    elif [[ ${#matches[@]} -eq 1 ]]; then
-        # Exactly one match - perfect!
-        echo "$specs_dir/${matches[0]}"
-    else
-        # Multiple matches - this shouldn't happen with proper naming convention
-        echo "ERROR: Multiple spec directories found with prefix '$prefix': ${matches[*]}" >&2
-        echo "Please ensure only one spec directory exists per prefix." >&2
-        return 1
-    fi
+    echo "$specs_dir/$branch_name"
 }
 
 get_feature_paths() {
@@ -262,8 +234,8 @@ get_feature_paths() {
 
     # Resolve feature directory.  Priority:
     #   1. SPECIFY_FEATURE_DIRECTORY env var (explicit override)
-    #   2. .specify/feature.json "feature_directory" key (persisted by /speckit.specify)
-    #   3. Branch-name-based prefix lookup (legacy fallback)
+    #   2. .specify/feature.json "feature_directory" key (persisted by /speckit-specify)
+    #   3. Branch-name-based exact lookup
     local feature_dir
     if [[ -n "${SPECIFY_FEATURE_DIRECTORY:-}" ]]; then
         feature_dir="$SPECIFY_FEATURE_DIRECTORY"
@@ -271,18 +243,18 @@ get_feature_paths() {
         [[ "$feature_dir" != /* ]] && feature_dir="$repo_root/$feature_dir"
     elif [[ -f "$repo_root/.specify/feature.json" ]]; then
         # Shared, set -e-safe parser: jq -> python3 -> grep/sed. Returns empty on
-        # missing/unparseable/unset so we fall through to the branch-prefix lookup.
+        # missing/unparseable/unset so we fall through to exact branch lookup.
         local _fd
         _fd=$(read_feature_json_feature_directory "$repo_root")
         if [[ -n "$_fd" ]]; then
             feature_dir="$_fd"
             # Normalize relative paths to absolute under repo root
             [[ "$feature_dir" != /* ]] && feature_dir="$repo_root/$feature_dir"
-        elif ! feature_dir=$(find_feature_dir_by_prefix "$repo_root" "$current_branch"); then
+        elif ! feature_dir=$(find_feature_dir_by_branch "$repo_root" "$current_branch"); then
             echo "ERROR: Failed to resolve feature directory" >&2
             return 1
         fi
-    elif ! feature_dir=$(find_feature_dir_by_prefix "$repo_root" "$current_branch"); then
+    elif ! feature_dir=$(find_feature_dir_by_branch "$repo_root" "$current_branch"); then
         echo "ERROR: Failed to resolve feature directory" >&2
         return 1
     fi
@@ -305,6 +277,83 @@ get_feature_paths() {
 # Check if jq is available for safe JSON construction
 has_jq() {
     command -v jq >/dev/null 2>&1
+}
+
+get_invoke_separator() {
+    local repo_root="${1:-$(get_repo_root)}"
+    if [[ "${_SPECIFY_INVOKE_SEPARATOR_CACHE_REPO_ROOT:-}" == "$repo_root" && -n "${_SPECIFY_INVOKE_SEPARATOR_CACHE_VALUE:-}" ]]; then
+        printf '%s\n' "$_SPECIFY_INVOKE_SEPARATOR_CACHE_VALUE"
+        return 0
+    fi
+
+    local integration_json="$repo_root/.specify/integration.json"
+    local separator="."
+    local parsed_with_jq=0
+
+    if [[ -f "$integration_json" ]]; then
+        if command -v jq >/dev/null 2>&1; then
+            local jq_separator
+            if jq_separator=$(jq -r '(.default_integration // .integration // "") as $k | if $k == "" then "." else (.integration_settings[$k].invoke_separator // ".") end' "$integration_json" 2>/dev/null); then
+                parsed_with_jq=1
+                case "$jq_separator" in
+                    "."|"-") separator="$jq_separator" ;;
+                esac
+            fi
+        fi
+
+        if [[ "$parsed_with_jq" -eq 0 ]] && command -v python3 >/dev/null 2>&1; then
+            if separator=$(python3 - "$integration_json" <<'PY' 2>/dev/null
+import json
+import sys
+
+try:
+    with open(sys.argv[1], encoding="utf-8") as fh:
+        state = json.load(fh)
+    key = state.get("default_integration") or state.get("integration") or ""
+    settings = state.get("integration_settings")
+    separator = "."
+    if isinstance(key, str) and isinstance(settings, dict):
+        entry = settings.get(key)
+        if isinstance(entry, dict) and entry.get("invoke_separator") in {".", "-"}:
+            separator = entry["invoke_separator"]
+    print(separator)
+except Exception:
+    print(".")
+PY
+); then
+                case "$separator" in
+                    "."|"-") ;;
+                    *) separator="." ;;
+                esac
+            else
+                separator="."
+            fi
+        fi
+    fi
+
+    _SPECIFY_INVOKE_SEPARATOR_CACHE_REPO_ROOT="$repo_root"
+    _SPECIFY_INVOKE_SEPARATOR_CACHE_VALUE="$separator"
+    printf '%s\n' "$separator"
+}
+
+format_speckit_command() {
+    local command_name="$1"
+    local repo_root="${2:-$(get_repo_root)}"
+    local separator
+    if [[ "${_SPECIFY_INVOKE_SEPARATOR_CACHE_REPO_ROOT:-}" == "$repo_root" && -n "${_SPECIFY_INVOKE_SEPARATOR_CACHE_VALUE:-}" ]]; then
+        separator="$_SPECIFY_INVOKE_SEPARATOR_CACHE_VALUE"
+    else
+        separator=$(get_invoke_separator "$repo_root")
+        _SPECIFY_INVOKE_SEPARATOR_CACHE_REPO_ROOT="$repo_root"
+        _SPECIFY_INVOKE_SEPARATOR_CACHE_VALUE="$separator"
+    fi
+
+    command_name="${command_name#/}"
+    command_name="${command_name#speckit.}"
+    command_name="${command_name#speckit-}"
+    command_name="${command_name//./$separator}"
+
+    printf '/speckit%s%s\n' "$separator" "$command_name"
 }
 
 # Escape a string for safe embedding in a JSON value (fallback when jq is unavailable).

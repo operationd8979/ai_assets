@@ -1,46 +1,58 @@
-# Specification Base Constitution
+# [PROJECT_NAME] Constitution
+<!-- Example: Spec Constitution, TaskFlow Constitution, etc. -->
 
 ## Core Principles
 
-### I. Contract-First Interfaces (NON-NEGOTIABLE)
+### [PRINCIPLE_1_NAME]
+<!-- Example: I. Library-First -->
+[PRINCIPLE_1_DESCRIPTION]
+<!-- Example: Every feature starts as a standalone library; Libraries must be self-contained, independently testable, documented; Clear purpose required - no organizational-only libraries -->
 
-Every externally visible behavior MUST be specified before implementation begins. API features MUST define HTTP method, route, auth, request schema, success response, error responses, and compatibility impact. Angular UI features MUST define routes, user-visible states, component/service boundaries, accessibility expectations, responsive behavior, and API/service dependencies. Full-stack features MUST define both API and UI contracts plus how the UI consumes the API. No implementation task may begin until the relevant contract/interface is complete and reviewed.
+### [PRINCIPLE_2_NAME]
+<!-- Example: II. CLI Interface -->
+[PRINCIPLE_2_DESCRIPTION]
+<!-- Example: Every library exposes functionality via CLI; Text in/out protocol: stdin/args → stdout, errors → stderr; Support JSON + human-readable formats -->
 
-### II. Stack-Aware Test Data and Mocks (NON-NEGOTIABLE)
+### [PRINCIPLE_3_NAME]
+<!-- Example: III. Test-First (NON-NEGOTIABLE) -->
+[PRINCIPLE_3_DESCRIPTION]
+<!-- Example: TDD mandatory: Tests written → User approved → Tests fail → Then implement; Red-Green-Refactor cycle strictly enforced -->
 
-All test data, mocks, and fixtures MUST live in the project-approved location declared by `plan.md`. API tests SHOULD load request/response examples from shared test data when exact payload behavior matters. Angular tests SHOULD use shared mocks, test providers, or builders for services, route data, and async UI states. When a contract or UI state changes, update the corresponding test data/mocks before implementation.
+### [PRINCIPLE_4_NAME]
+<!-- Example: IV. Integration Testing -->
+[PRINCIPLE_4_DESCRIPTION]
+<!-- Example: Focus areas requiring integration tests: New library contract tests, Contract changes, Inter-service communication, Shared schemas -->
 
-### III. Tests Required - TDD (NON-NEGOTIABLE)
+### [PRINCIPLE_5_NAME]
+<!-- Example: V. Observability, VI. Versioning & Breaking Changes, VII. Simplicity -->
+[PRINCIPLE_5_DESCRIPTION]
+<!-- Example: Text I/O ensures debuggability; Structured logging required; Or: MAJOR.MINOR.BUILD format; Or: Start simple, YAGNI principles -->
 
-Tests are REQUIRED for every feature. Every Acceptance Scenario in `spec.md` MUST have a stack-appropriate automated test or an explicitly documented manual check when automation is not feasible. API features require backend contract/integration coverage for externally visible behavior. Angular UI features require Karma/Jasmine coverage through `ng test` for component, service, route, and state behavior as applicable. Workflow is strictly: write failing test/check -> review -> implement -> test passes. The `## Test Coverage` table in `spec.md` MUST remain current.
+## [SECTION_2_NAME]
+<!-- Example: Additional Constraints, Security Requirements, Performance Standards, etc. -->
 
-### IV. Simplicity (YAGNI)
+[SECTION_2_CONTENT]
+<!-- Example: Technology stack requirements, compliance standards, deployment policies, etc. -->
 
-Choose the simplest structure that fits the feature and existing project conventions. Do NOT add new layers, state-management libraries, backend abstractions, UI frameworks, generated clients, shared packages, or cross-cutting infrastructure unless a concrete problem demands them and the violation is documented in `plan.md` Complexity Tracking. Existing project patterns are preferred over new abstractions.
+## [SECTION_3_NAME]
+<!-- Example: Development Workflow, Review Process, Quality Gates, etc. -->
 
-### V. Versioning, Compatibility, and Breaking Changes
+[SECTION_3_CONTENT]
+<!-- Example: Code review requirements, testing gates, deployment approval process, etc. -->
 
-Breaking changes require explicit migration or compatibility notes. API breaking changes MUST document route/version behavior, response changes, client impact, and migration path. Angular breaking changes MUST document changed routes, component inputs/outputs, navigation behavior, user-visible workflow impact, and migration path. Full-stack breaking changes MUST document both API and UI compatibility.
+## Spec-Driven Workflow Requirements
 
-## Technology Stack Policy
-
-- **Backend**: Use the existing backend runtime, package conventions, project layout, auth, configuration, and CI commands unless `plan.md` justifies a change.
-- **Angular UI**: Use the existing Angular workspace conventions, routing style, component style, styling approach, and Karma/Jasmine test setup unless `plan.md` justifies a change.
-- **Full-stack**: Stabilize API contracts before wiring Angular services to new or changed backend behavior.
-- **Testing**: Use stack-specific commands from `quickstart.md`; Angular Karma/Jasmine features use `ng test --watch=false --browsers=ChromeHeadless` for CI-style validation.
-- **CI**: Pull requests are blocked when any required stack-specific build or test command fails.
-
-## Development Workflow
-
-1. Write `spec.md` with feature type, stack, contracts/interfaces, success criteria, assumptions, and Test Coverage complete.
-2. Write `plan.md` with technical context, project structure, validation commands, and Constitution Check.
-3. Create or update contracts, test data, mocks, and failing tests before implementation.
-4. Implement the smallest change that satisfies the failing tests and acceptance scenarios.
-5. Run stack-specific validation commands locally before PR.
-6. Document complexity, compatibility, or testing exceptions in `plan.md`.
+- Feature branches MUST use the exact basename of their spec directory under `specs/` (for example, branch `001-user-auth` maps to `specs/001-user-auth`).
+- .NET API or OData changes MUST include contract tests for each changed endpoint or OData surface using `Microsoft.AspNetCore.Mvc.Testing` and `WebApplicationFactory`.
+- .NET backend behavior changes MUST include unit tests that run under `dotnet test`.
+- Angular changes MUST include Karma/Jasmine unit tests in `*.spec.ts` files that run under `ng test --watch=false`.
+- Required tests MUST be written before implementation tasks and MUST pass before related implementation tasks are marked complete.
 
 ## Governance
+<!-- Example: Constitution supersedes all other practices; Amendments require documentation, approval, migration plan -->
 
-This constitution supersedes conflicting generated guidance. All spec, plan, task, checklist, and PR reviews must verify compliance with Principles I-V. Violations must be documented in `plan.md` Complexity Tracking with rationale and the simpler alternative that was rejected. Amendments require a version bump, date, and rationale.
+[GOVERNANCE_RULES]
+<!-- Example: All PRs/reviews must verify compliance; Complexity must be justified; Use [GUIDANCE_FILE] for runtime development guidance -->
 
-**Version**: 1.1.0 | **Ratified**: 2026-06-03 | **Last Amended**: 2026-06-04
+**Version**: [CONSTITUTION_VERSION] | **Ratified**: [RATIFICATION_DATE] | **Last Amended**: [LAST_AMENDED_DATE]
+<!-- Example: Version: 2.1.1 | Ratified: 2025-06-13 | Last Amended: 2025-07-16 -->

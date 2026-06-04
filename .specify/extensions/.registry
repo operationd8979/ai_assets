@@ -8,7 +8,14 @@
       "enabled": true,
       "priority": 10,
       "registered_commands": {
-        "copilot": [
+        "agy": [
+          "speckit.git.feature",
+          "speckit.git.validate",
+          "speckit.git.remote",
+          "speckit.git.initialize",
+          "speckit.git.commit"
+        ],
+        "codex": [
           "speckit.git.feature",
           "speckit.git.validate",
           "speckit.git.remote",
@@ -17,7 +24,7 @@
         ]
       },
       "registered_skills": [],
-      "installed_at": "2026-06-03T06:24:10.168077+00:00"
+      "installed_at": "2026-06-04T04:51:11.127534+00:00"
     },
     "agent-context": {
       "version": "1.0.0",
@@ -26,12 +33,15 @@
       "enabled": true,
       "priority": 10,
       "registered_commands": {
-        "copilot": [
+        "agy": [
+          "speckit.agent-context.update"
+        ],
+        "codex": [
           "speckit.agent-context.update"
         ]
       },
       "registered_skills": [],
-      "installed_at": "2026-06-03T06:24:10.282064+00:00"
+      "installed_at": "2026-06-04T04:51:11.290897+00:00"
     }
   }
 }

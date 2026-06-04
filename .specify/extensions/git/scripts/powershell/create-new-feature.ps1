@@ -32,6 +32,8 @@ if ($Help) {
     Write-Host ""
     Write-Host "Environment variables:"
     Write-Host "  GIT_BRANCH_NAME     Use this exact branch name, bypassing all prefix/suffix generation"
+    Write-Host "  SPECIFY_FEATURE_DIRECTORY"
+    Write-Host "                      Use the basename of this spec directory as the branch name when GIT_BRANCH_NAME is not set"
     Write-Host ""
     exit 0
 }
@@ -258,13 +260,34 @@ function Get-BranchName {
     }
 }
 
-# Check for GIT_BRANCH_NAME env var override (exact branch name, no prefix/suffix)
+function Get-FeatureDirectoryBranchName {
+    param([string]$FeatureDirectory)
+
+    $trimmed = $FeatureDirectory.Trim().TrimEnd(
+        [System.IO.Path]::DirectorySeparatorChar,
+        [System.IO.Path]::AltDirectorySeparatorChar
+    )
+    $leaf = Split-Path -Leaf $trimmed
+    if ([string]::IsNullOrWhiteSpace($leaf)) {
+        throw "SPECIFY_FEATURE_DIRECTORY must include a feature directory name."
+    }
+    return $leaf
+}
+
+$exactBranchName = ''
 if ($env:GIT_BRANCH_NAME) {
-    $branchName = $env:GIT_BRANCH_NAME
+    $exactBranchName = $env:GIT_BRANCH_NAME
+} elseif ($env:SPECIFY_FEATURE_DIRECTORY) {
+    $exactBranchName = Get-FeatureDirectoryBranchName -FeatureDirectory $env:SPECIFY_FEATURE_DIRECTORY
+}
+
+# Check for exact branch name overrides (no prefix/suffix generation)
+if ($exactBranchName) {
+    $branchName = $exactBranchName
     # Check 244-byte limit (UTF-8) for override names
     $branchNameUtf8ByteCount = [System.Text.Encoding]::UTF8.GetByteCount($branchName)
     if ($branchNameUtf8ByteCount -gt 244) {
-        throw "GIT_BRANCH_NAME must be 244 bytes or fewer in UTF-8. Provided value is $branchNameUtf8ByteCount bytes; please supply a shorter override branch name."
+        throw "Exact branch name overrides must be 244 bytes or fewer in UTF-8. Provided value is $branchNameUtf8ByteCount bytes; please supply a shorter override branch name."
     }
     # Extract FEATURE_NUM from the branch name if it starts with a numeric prefix
     # Check timestamp pattern first (YYYYMMDD-HHMMSS-) since it also matches the simpler ^\d+ pattern

@@ -26,7 +26,8 @@ function Get-SpecKitEffectiveBranchName {
 function Test-FeatureBranch {
     param(
         [string]$Branch,
-        [bool]$HasGit = $true
+        [bool]$HasGit = $true,
+        [string]$RepoRoot = (Get-Location)
     )
 
     # For non-git repos, we can't enforce branch naming but still provide output
@@ -45,6 +46,12 @@ function Test-FeatureBranch {
     if (-not $isSequential -and $Branch -notmatch '^\d{8}-\d{6}-') {
         [Console]::Error.WriteLine("ERROR: Not on a feature branch. Current branch: $raw")
         [Console]::Error.WriteLine("Feature branches should be named like: 001-feature-name, 1234-feature-name, or 20260319-143022-feature-name")
+        return $false
+    }
+    $expectedSpecDir = Join-Path (Join-Path $RepoRoot 'specs') $Branch
+    if (-not (Test-Path -Path $expectedSpecDir -PathType Container)) {
+        [Console]::Error.WriteLine("ERROR: No exact spec directory found for branch '$Branch'.")
+        [Console]::Error.WriteLine("Expected: specs/$Branch")
         return $false
     }
     return $true

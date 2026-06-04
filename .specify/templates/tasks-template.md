@@ -9,7 +9,7 @@ description: "Task list template for feature implementation"
 
 **Prerequisites**: plan.md (required), spec.md (required for user stories), research.md, data-model.md, contracts/
 
-**Tests**: Tests are REQUIRED for every feature. Every Acceptance Scenario in `spec.md` MUST have a corresponding stack-appropriate test. TDD order: test data/mocks -> failing tests -> implementation -> passing tests.
+**Tests**: The examples below include test tasks. Tests are REQUIRED for .NET and Angular work. For other stacks, include tests when requested by the feature specification or project constitution.
 
 **Organization**: Tasks are grouped by user story to enable independent implementation and testing of each story.
 
@@ -18,44 +18,25 @@ description: "Task list template for feature implementation"
 - **[P]**: Can run in parallel (different files, no dependencies)
 - **[Story]**: Which user story this task belongs to (e.g., US1, US2, US3)
 - Include exact file paths in descriptions
-- Include the stack in tasks when a feature spans more than one stack: `[API]`, `[Angular]`, or `[Full-stack]`
 
-## Path Conventions by Stack
+## Path Conventions
 
-<!--
-  ACTION REQUIRED: Keep only the path conventions that apply to this feature.
-  Replace placeholders with actual project paths from plan.md.
--->
-
-### .NET API
-
-- **API source**: `src/[ApiProject]/`
-- **API contracts/models**: `src/[ApiProject]/[Contracts|Models]/`
-- **API tests**: `tests/[ApiProject].Tests/`
-- **API test data**: `tests/[ApiProject].Tests/TestData/{FeatureName}/`
-
-### Angular UI
-
-- **Feature source**: `src/app/[feature]/`
-- **Component tests**: `src/app/[feature]/[feature].component.spec.ts`
-- **Service tests**: `src/app/[feature]/[feature].service.spec.ts`
-- **UI test data/mocks**: `src/app/[feature]/testing/` or existing project convention
-
-### Full-stack
-
-- Use both API and Angular conventions.
-- Keep API contract tasks before Angular service integration tasks when the UI consumes new or changed endpoints.
+- **Single project**: `src/`, `tests/` at repository root
+- **Web app**: `backend/src/`, `frontend/src/`
+- **.NET API/OData**: `backend/src/`, `backend/tests/Contract/`, `backend/tests/Unit/`
+- **Angular**: `frontend/src/app/**`, `frontend/src/app/**/*.spec.ts`
+- **Mobile**: `api/src/`, `ios/src/` or `android/src/`
+- Paths shown below assume single project - adjust based on plan.md structure
 
 <!--
   ============================================================================
   IMPORTANT: The tasks below are SAMPLE TASKS for illustration purposes only.
 
-  The /speckit.tasks command MUST replace these with actual tasks based on:
+  The /speckit-tasks command MUST replace these with actual tasks based on:
   - User stories from spec.md (with their priorities P1, P2, P3...)
   - Feature requirements from plan.md
   - Entities from data-model.md
-  - Contracts from contracts/
-  - Selected stack(s): .NET API, Angular UI, full-stack, or other
+  - Endpoints from contracts/
 
   Tasks MUST be organized by user story so each story can be:
   - Implemented independently
@@ -66,65 +47,62 @@ description: "Task list template for feature implementation"
   ============================================================================
 -->
 
-## Phase 1: Setup (Existing Project Verification)
+## Phase 1: Setup (Shared Infrastructure)
 
-**Purpose**: Verify existing project structure, dependencies, and baseline commands match plan.md.
+**Purpose**: Project initialization and basic structure
 
-- [ ] T001 Confirm selected stack(s), project paths, and test commands from `plan.md`
-- [ ] T002 Verify build command from `quickstart.md` succeeds for the selected stack(s)
-- [ ] T003 Verify baseline test command from `quickstart.md` succeeds before changes
-- [ ] T004 [P] Confirm required configuration, environment files, and secrets are documented without committing secrets
-
-### Angular setup commands *(use when Angular applies)*
-
-- [ ] T005 [Angular] Install dependencies with `npm ci`
-- [ ] T006 [Angular] Verify production-safe build with `ng build`
-- [ ] T007 [Angular] Verify Karma/Jasmine baseline with `ng test --watch=false --browsers=ChromeHeadless`
+- [ ] T001 Create project structure per implementation plan
+- [ ] T002 Initialize [language] project with [framework] dependencies
+- [ ] T003 [P] Configure linting and formatting tools
+- [ ] T004 [P] Add Microsoft.AspNetCore.Mvc.Testing to the .NET API/OData contract test project when backend API/OData is in scope
+- [ ] T005 [P] Confirm Angular Karma/Jasmine test setup and `ng test --watch=false` command when Angular is in scope
 
 ---
 
-## Phase 2: Foundational (Test and Contract Infrastructure)
+## Phase 2: Foundational (Blocking Prerequisites)
 
-**Purpose**: Create or verify infrastructure that MUST exist before user story tests can be written.
+**Purpose**: Core infrastructure that MUST be complete before ANY user story can be implemented
 
-**CRITICAL**: No story implementation should begin until this phase is complete.
+**⚠️ CRITICAL**: No user story work can begin until this phase is complete
 
-- [ ] T008 Confirm contract/interface definitions from `spec.md` are represented in `contracts/`
-- [ ] T009 [P] Create or verify test data/mocks directory for this feature
-- [ ] T010 [API] Create or verify backend contract test base/helpers using the existing test framework
-- [ ] T011 [Angular] Create or verify Angular testing helpers, service mocks, route test setup, and shared providers
-- [ ] T012 [Full-stack] Confirm API contract changes are consumable by the Angular service layer
+Examples of foundational tasks (adjust based on your project):
 
-**Checkpoint**: Stack-specific test commands compile and run. User story work can begin.
+- [ ] T006 Setup database schema and migrations framework
+- [ ] T007 [P] Implement authentication/authorization framework
+- [ ] T008 [P] Setup API routing and middleware structure
+- [ ] T009 Create base models/entities that all stories depend on
+- [ ] T010 Configure error handling and logging infrastructure
+- [ ] T011 Setup environment configuration management
+
+**Checkpoint**: Foundation ready - user story implementation can now begin in parallel
 
 ---
 
-## Phase 3: User Story 1 - [Title] (Priority: P1) - MVP
+## Phase 3: User Story 1 - [Title] (Priority: P1) 🎯 MVP
 
 **Goal**: [Brief description of what this story delivers]
 
 **Independent Test**: [How to verify this story works on its own]
 
-### Tests for User Story 1 (REQUIRED - TDD order)
+### Tests for User Story 1 (REQUIRED for .NET/Angular; otherwise if tests requested) ⚠️
 
-> Write test data/mocks and tests FIRST. Confirm they FAIL before writing implementation code.
+> **NOTE: Write these tests FIRST, ensure they FAIL before implementation**
 
-- [ ] T013 [P] [US1] Create test data or mocks for [scenario] in `[test-data-or-mocks-path]`
-- [ ] T014 [API] [US1] Add backend contract/integration test for [endpoint or behavior] in `[api-test-path]`
-- [ ] T015 [API] [US1] Add backend unit test for [service/logic] in `[api-unit-test-path]`
-- [ ] T016 [Angular] [US1] Add component test for [view behavior] in `[component-spec-path]`
-- [ ] T017 [Angular] [US1] Add service or route test for [dependency/navigation behavior] in `[service-or-route-spec-path]`
+- [ ] T012 [P] [US1] .NET API/OData contract test for [endpoint/query] using Microsoft.AspNetCore.Mvc.Testing/WebApplicationFactory in backend/tests/Contract/[Feature]ContractTests.cs
+- [ ] T013 [P] [US1] .NET unit test for [service/domain behavior] in backend/tests/Unit/[Service]Tests.cs
+- [ ] T014 [P] [US1] Angular Karma/Jasmine unit test for [component/service] in frontend/src/app/[path]/[name].spec.ts
+- [ ] T015 [P] [US1] Integration test for [user journey] in tests/integration/test_[name].[ext]
 
 ### Implementation for User Story 1
 
-- [ ] T018 [API] [US1] Implement or update API contract/model in `[api-contract-or-model-path]`
-- [ ] T019 [API] [US1] Implement endpoint/service behavior in `[api-source-path]`
-- [ ] T020 [Angular] [US1] Implement or update component/template/styles in `[angular-feature-path]`
-- [ ] T021 [Angular] [US1] Implement or update service integration in `[angular-service-path]`
-- [ ] T022 [US1] Add validation, error handling, loading/empty/error UI states per spec.md
-- [ ] T023 [US1] Confirm stack-specific tests for US1 now pass
+- [ ] T016 [P] [US1] Create [Entity1] model in src/models/[entity1].[ext]
+- [ ] T017 [P] [US1] Create [Entity2] model in src/models/[entity2].[ext]
+- [ ] T018 [US1] Implement [Service] in src/services/[service].[ext] (depends on T016, T017)
+- [ ] T019 [US1] Implement [endpoint/feature] in src/[location]/[file].[ext]
+- [ ] T020 [US1] Add validation and error handling
+- [ ] T021 [US1] Add logging for user story 1 operations
 
-**Checkpoint**: User Story 1 is fully functional and testable independently.
+**Checkpoint**: At this point, User Story 1 should be fully functional and testable independently
 
 ---
 
@@ -134,19 +112,20 @@ description: "Task list template for feature implementation"
 
 **Independent Test**: [How to verify this story works on its own]
 
-### Tests for User Story 2 (REQUIRED - TDD order)
+### Tests for User Story 2 (REQUIRED for .NET/Angular; otherwise if tests requested) ⚠️
 
-- [ ] T024 [P] [US2] Create test data or mocks for [scenario] in `[test-data-or-mocks-path]`
-- [ ] T025 [API] [US2] Add backend contract/integration test for [endpoint or behavior] in `[api-test-path]`
-- [ ] T026 [Angular] [US2] Add component/service/route test for [UI behavior] in `[angular-spec-path]`
+- [ ] T022 [P] [US2] .NET API/OData contract test for [endpoint/query] using Microsoft.AspNetCore.Mvc.Testing/WebApplicationFactory in backend/tests/Contract/[Feature]ContractTests.cs
+- [ ] T023 [P] [US2] .NET unit test for [service/domain behavior] in backend/tests/Unit/[Service]Tests.cs
+- [ ] T024 [P] [US2] Angular Karma/Jasmine unit test for [component/service] in frontend/src/app/[path]/[name].spec.ts
 
 ### Implementation for User Story 2
 
-- [ ] T027 [API] [US2] Implement backend behavior in `[api-source-path]`
-- [ ] T028 [Angular] [US2] Implement Angular behavior in `[angular-feature-path]`
-- [ ] T029 [US2] Confirm stack-specific tests for US2 now pass
+- [ ] T025 [P] [US2] Create [Entity] model in src/models/[entity].[ext]
+- [ ] T026 [US2] Implement [Service] in src/services/[service].[ext]
+- [ ] T027 [US2] Implement [endpoint/feature] in src/[location]/[file].[ext]
+- [ ] T028 [US2] Integrate with User Story 1 components (if needed)
 
-**Checkpoint**: User Stories 1 and 2 work independently.
+**Checkpoint**: At this point, User Stories 1 AND 2 should both work independently
 
 ---
 
@@ -156,19 +135,19 @@ description: "Task list template for feature implementation"
 
 **Independent Test**: [How to verify this story works on its own]
 
-### Tests for User Story 3 (REQUIRED - TDD order)
+### Tests for User Story 3 (REQUIRED for .NET/Angular; otherwise if tests requested) ⚠️
 
-- [ ] T030 [P] [US3] Create test data or mocks for [scenario] in `[test-data-or-mocks-path]`
-- [ ] T031 [API] [US3] Add backend contract/integration test for [endpoint or behavior] in `[api-test-path]`
-- [ ] T032 [Angular] [US3] Add component/service/route test for [UI behavior] in `[angular-spec-path]`
+- [ ] T029 [P] [US3] .NET API/OData contract test for [endpoint/query] using Microsoft.AspNetCore.Mvc.Testing/WebApplicationFactory in backend/tests/Contract/[Feature]ContractTests.cs
+- [ ] T030 [P] [US3] .NET unit test for [service/domain behavior] in backend/tests/Unit/[Service]Tests.cs
+- [ ] T031 [P] [US3] Angular Karma/Jasmine unit test for [component/service] in frontend/src/app/[path]/[name].spec.ts
 
 ### Implementation for User Story 3
 
-- [ ] T033 [API] [US3] Implement backend behavior in `[api-source-path]`
-- [ ] T034 [Angular] [US3] Implement Angular behavior in `[angular-feature-path]`
-- [ ] T035 [US3] Confirm stack-specific tests for US3 now pass
+- [ ] T032 [P] [US3] Create [Entity] model in src/models/[entity].[ext]
+- [ ] T033 [US3] Implement [Service] in src/services/[service].[ext]
+- [ ] T034 [US3] Implement [endpoint/feature] in src/[location]/[file].[ext]
 
-**Checkpoint**: All planned user stories work independently.
+**Checkpoint**: All user stories should now be independently functional
 
 ---
 
@@ -178,15 +157,14 @@ description: "Task list template for feature implementation"
 
 ## Phase N: Polish & Cross-Cutting Concerns
 
-**Purpose**: Improvements that affect multiple user stories.
+**Purpose**: Improvements that affect multiple user stories
 
-- [ ] TXXX [P] Documentation updates in docs or feature quickstart
+- [ ] TXXX [P] Documentation updates in docs/
 - [ ] TXXX Code cleanup and refactoring
-- [ ] TXXX Performance optimization across all affected stacks
-- [ ] TXXX [API] Additional backend tests for shared logic or cross-cutting behavior
-- [ ] TXXX [Angular] Additional accessibility, responsive, and component edge-case tests
-- [ ] TXXX Security hardening and authorization checks
-- [ ] TXXX Run quickstart.md validation end to end
+- [ ] TXXX Performance optimization across all stories
+- [ ] TXXX [P] Additional unit tests for touched .NET/Angular behavior or requested coverage gaps
+- [ ] TXXX Security hardening
+- [ ] TXXX Run quickstart.md validation, including `dotnet test` for .NET work and `ng test --watch=false` for Angular work
 
 ---
 
@@ -195,46 +173,48 @@ description: "Task list template for feature implementation"
 ### Phase Dependencies
 
 - **Setup (Phase 1)**: No dependencies - can start immediately
-- **Foundational (Phase 2)**: Depends on Setup completion - blocks all user stories
-- **User Stories (Phase 3+)**: Depend on Foundational phase completion
+- **Foundational (Phase 2)**: Depends on Setup completion - BLOCKS all user stories
+- **User Stories (Phase 3+)**: All depend on Foundational phase completion
+  - User stories can then proceed in parallel (if staffed)
+  - Or sequentially in priority order (P1 → P2 → P3)
 - **Polish (Final Phase)**: Depends on all desired user stories being complete
 
 ### User Story Dependencies
 
-- **User Story 1 (P1)**: Can start after Foundational - no dependencies on other stories
-- **User Story 2 (P2)**: Can start after Foundational - may integrate with US1 but must be independently testable
-- **User Story 3 (P3)**: Can start after Foundational - may integrate with US1/US2 but must be independently testable
+- **User Story 1 (P1)**: Can start after Foundational (Phase 2) - No dependencies on other stories
+- **User Story 2 (P2)**: Can start after Foundational (Phase 2) - May integrate with US1 but should be independently testable
+- **User Story 3 (P3)**: Can start after Foundational (Phase 2) - May integrate with US1/US2 but should be independently testable
 
 ### Within Each User Story
 
-- Test data/mocks MUST exist before tests are written
-- Tests MUST be written and FAIL before implementation
-- Contracts/interfaces before consumers
-- API changes before Angular service integration when the UI depends on new backend behavior
-- Stack-specific test commands MUST pass before a story is considered complete
-- Story complete before moving to the next priority unless parallel staffing is explicit
+- Tests MUST be written and FAIL before implementation for .NET/Angular work; other stacks follow the feature specification and constitution
+- Models before services
+- Services before endpoints
+- Core implementation before integration
+- Story complete before moving to next priority
 
 ### Parallel Opportunities
 
-- Setup tasks marked [P] can run in parallel
-- Foundational tasks marked [P] can run in parallel when they touch different stacks
-- Tests for a user story can run in parallel when they touch different files
-- API and Angular implementation can run in parallel after contracts are stable
-- Different user stories can be worked on in parallel by different team members after Foundational completes
+- All Setup tasks marked [P] can run in parallel
+- All Foundational tasks marked [P] can run in parallel (within Phase 2)
+- Once Foundational phase completes, all user stories can start in parallel (if team capacity allows)
+- All tests for a user story marked [P] can run in parallel
+- Models within a story marked [P] can run in parallel
+- Different user stories can be worked on in parallel by different team members
 
 ---
 
 ## Parallel Example: User Story 1
 
-```text
-# Create test data and tests first:
-Task: "Create test data/mocks in [test-data-or-mocks-path]"
-Task: "Add API contract test in [api-test-path]"
-Task: "Add Angular component test in [component-spec-path]"
+```bash
+# Launch all tests for User Story 1 together:
+Task: ".NET API/OData contract test for [endpoint/query] using Microsoft.AspNetCore.Mvc.Testing/WebApplicationFactory in backend/tests/Contract/[Feature]ContractTests.cs"
+Task: ".NET unit test for [service/domain behavior] in backend/tests/Unit/[Service]Tests.cs"
+Task: "Angular Karma/Jasmine unit test for [component/service] in frontend/src/app/[path]/[name].spec.ts"
 
-# After tests are failing, implement where files do not conflict:
-Task: "Implement API behavior in [api-source-path]"
-Task: "Implement Angular component and service behavior in [angular-feature-path]"
+# Launch all models for User Story 1 together:
+Task: "Create [Entity1] model in src/models/[entity1].py"
+Task: "Create [Entity2] model in src/models/[entity2].py"
 ```
 
 ---
@@ -244,20 +224,22 @@ Task: "Implement Angular component and service behavior in [angular-feature-path
 ### MVP First (User Story 1 Only)
 
 1. Complete Phase 1: Setup
-2. Complete Phase 2: Foundational
+2. Complete Phase 2: Foundational (CRITICAL - blocks all stories)
 3. Complete Phase 3: User Story 1
-4. Stop and validate User Story 1 independently
+4. **STOP and VALIDATE**: Test User Story 1 independently
 5. Deploy/demo if ready
 
 ### Incremental Delivery
 
-1. Complete Setup + Foundational
-2. Add User Story 1 -> test independently -> deploy/demo
-3. Add User Story 2 -> test independently -> deploy/demo
-4. Add User Story 3 -> test independently -> deploy/demo
+1. Complete Setup + Foundational → Foundation ready
+2. Add User Story 1 → Test independently → Deploy/Demo (MVP!)
+3. Add User Story 2 → Test independently → Deploy/Demo
+4. Add User Story 3 → Test independently → Deploy/Demo
 5. Each story adds value without breaking previous stories
 
 ### Parallel Team Strategy
+
+With multiple developers:
 
 1. Team completes Setup + Foundational together
 2. Once Foundational is done:
@@ -271,9 +253,9 @@ Task: "Implement Angular component and service behavior in [angular-feature-path
 ## Notes
 
 - [P] tasks = different files, no dependencies
-- [Story] label maps task to a specific user story for traceability
+- [Story] label maps task to specific user story for traceability
 - Each user story should be independently completable and testable
-- Verify tests fail before implementing
-- Commit after each task or logical group if the project workflow requires it
+- Verify required .NET/Angular tests fail before implementing, then pass with `dotnet test` and/or `ng test --watch=false`
+- Commit after each task or logical group
 - Stop at any checkpoint to validate story independently
-- Avoid vague tasks, same-file conflicts, and hidden cross-story dependencies
+- Avoid: vague tasks, same file conflicts, cross-story dependencies that break independence

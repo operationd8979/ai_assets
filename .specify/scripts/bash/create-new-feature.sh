@@ -64,10 +64,16 @@ while [ $i -le $# ]; do
             echo "  --timestamp         Use timestamp prefix (YYYYMMDD-HHMMSS) instead of sequential numbering"
             echo "  --help, -h          Show this help message"
             echo ""
+            echo "Environment variables:"
+            echo "  GIT_BRANCH_NAME     Use this exact branch name, bypassing all prefix/suffix generation"
+            echo "  SPECIFY_FEATURE_DIRECTORY"
+            echo "                      Use the basename of this spec directory as the branch name when GIT_BRANCH_NAME is not set"
+            echo ""
             echo "Examples:"
             echo "  $0 'Add user authentication system' --short-name 'user-auth'"
             echo "  $0 'Implement OAuth2 integration for API' --number 5"
             echo "  $0 --timestamp --short-name 'user-auth' 'Add user authentication'"
+            echo "  SPECIFY_FEATURE_DIRECTORY=specs/001-user-auth $0 'feature description'"
             exit 0
             ;;
         *)
@@ -256,54 +262,85 @@ generate_branch_name() {
     fi
 }
 
-# Generate branch name
-if [ -n "$SHORT_NAME" ]; then
-    # Use provided short name, just clean it up
-    BRANCH_SUFFIX=$(clean_branch_name "$SHORT_NAME")
-else
-    # Generate from description with smart filtering
-    BRANCH_SUFFIX=$(generate_branch_name "$FEATURE_DESCRIPTION")
+EXACT_BRANCH_NAME=""
+if [ -n "${GIT_BRANCH_NAME:-}" ]; then
+    EXACT_BRANCH_NAME="$GIT_BRANCH_NAME"
+elif [ -n "${SPECIFY_FEATURE_DIRECTORY:-}" ]; then
+    SPEC_DIR_PATH="${SPECIFY_FEATURE_DIRECTORY%/}"
+    SPEC_DIR_PATH="${SPEC_DIR_PATH%\\}"
+    SPEC_DIR_PATH="${SPEC_DIR_PATH//\\//}"
+    EXACT_BRANCH_NAME="$(basename "$SPEC_DIR_PATH")"
+    if [ -z "$EXACT_BRANCH_NAME" ] || [ "$EXACT_BRANCH_NAME" = "." ] || [ "$EXACT_BRANCH_NAME" = "/" ]; then
+        >&2 echo "Error: SPECIFY_FEATURE_DIRECTORY must include a feature directory name."
+        exit 1
+    fi
 fi
 
-# Warn if --number and --timestamp are both specified
-if [ "$USE_TIMESTAMP" = true ] && [ -n "$BRANCH_NUMBER" ]; then
-    >&2 echo "[specify] Warning: --number is ignored when --timestamp is used"
-    BRANCH_NUMBER=""
-fi
-
-# Determine branch prefix
-if [ "$USE_TIMESTAMP" = true ]; then
-    FEATURE_NUM=$(date +%Y%m%d-%H%M%S)
-    BRANCH_NAME="${FEATURE_NUM}-${BRANCH_SUFFIX}"
+if [ -n "$EXACT_BRANCH_NAME" ]; then
+    BRANCH_NAME="$EXACT_BRANCH_NAME"
+    if echo "$BRANCH_NAME" | grep -Eq '^[0-9]{8}-[0-9]{6}-'; then
+        FEATURE_NUM=$(echo "$BRANCH_NAME" | grep -Eo '^[0-9]{8}-[0-9]{6}')
+        BRANCH_SUFFIX="${BRANCH_NAME#${FEATURE_NUM}-}"
+    elif echo "$BRANCH_NAME" | grep -Eq '^[0-9]+-'; then
+        FEATURE_NUM=$(echo "$BRANCH_NAME" | grep -Eo '^[0-9]+')
+        BRANCH_SUFFIX="${BRANCH_NAME#${FEATURE_NUM}-}"
+    else
+        FEATURE_NUM="$BRANCH_NAME"
+        BRANCH_SUFFIX="$BRANCH_NAME"
+    fi
 else
-    # Determine branch number
-    if [ -z "$BRANCH_NUMBER" ]; then
-        if [ "$DRY_RUN" = true ] && [ "$HAS_GIT" = true ]; then
-            # Dry-run: query remotes via ls-remote (side-effect-free, no fetch)
-            BRANCH_NUMBER=$(check_existing_branches "$SPECS_DIR" true)
-        elif [ "$DRY_RUN" = true ]; then
-            # Dry-run without git: local spec dirs only
-            HIGHEST=$(get_highest_from_specs "$SPECS_DIR")
-            BRANCH_NUMBER=$((HIGHEST + 1))
-        elif [ "$HAS_GIT" = true ]; then
-            # Check existing branches on remotes
-            BRANCH_NUMBER=$(check_existing_branches "$SPECS_DIR")
-        else
-            # Fall back to local directory check
-            HIGHEST=$(get_highest_from_specs "$SPECS_DIR")
-            BRANCH_NUMBER=$((HIGHEST + 1))
-        fi
+    # Generate branch name
+    if [ -n "$SHORT_NAME" ]; then
+        # Use provided short name, just clean it up
+        BRANCH_SUFFIX=$(clean_branch_name "$SHORT_NAME")
+    else
+        # Generate from description with smart filtering
+        BRANCH_SUFFIX=$(generate_branch_name "$FEATURE_DESCRIPTION")
     fi
 
-    # Force base-10 interpretation to prevent octal conversion (e.g., 010 → 8 in octal, but should be 10 in decimal)
-    FEATURE_NUM=$(printf "%03d" "$((10#$BRANCH_NUMBER))")
-    BRANCH_NAME="${FEATURE_NUM}-${BRANCH_SUFFIX}"
+    # Warn if --number and --timestamp are both specified
+    if [ "$USE_TIMESTAMP" = true ] && [ -n "$BRANCH_NUMBER" ]; then
+        >&2 echo "[specify] Warning: --number is ignored when --timestamp is used"
+        BRANCH_NUMBER=""
+    fi
+
+    # Determine branch prefix
+    if [ "$USE_TIMESTAMP" = true ]; then
+        FEATURE_NUM=$(date +%Y%m%d-%H%M%S)
+        BRANCH_NAME="${FEATURE_NUM}-${BRANCH_SUFFIX}"
+    else
+        # Determine branch number
+        if [ -z "$BRANCH_NUMBER" ]; then
+            if [ "$DRY_RUN" = true ] && [ "$HAS_GIT" = true ]; then
+                # Dry-run: query remotes via ls-remote (side-effect-free, no fetch)
+                BRANCH_NUMBER=$(check_existing_branches "$SPECS_DIR" true)
+            elif [ "$DRY_RUN" = true ]; then
+                # Dry-run without git: local spec dirs only
+                HIGHEST=$(get_highest_from_specs "$SPECS_DIR")
+                BRANCH_NUMBER=$((HIGHEST + 1))
+            elif [ "$HAS_GIT" = true ]; then
+                # Check existing branches on remotes
+                BRANCH_NUMBER=$(check_existing_branches "$SPECS_DIR")
+            else
+                # Fall back to local directory check
+                HIGHEST=$(get_highest_from_specs "$SPECS_DIR")
+                BRANCH_NUMBER=$((HIGHEST + 1))
+            fi
+        fi
+
+        # Force base-10 interpretation to prevent octal conversion (e.g., 010 → 8 in octal, but should be 10 in decimal)
+        FEATURE_NUM=$(printf "%03d" "$((10#$BRANCH_NUMBER))")
+        BRANCH_NAME="${FEATURE_NUM}-${BRANCH_SUFFIX}"
+    fi
 fi
 
 # GitHub enforces a 244-byte limit on branch names
 # Validate and truncate if necessary
 MAX_BRANCH_LENGTH=244
-if [ ${#BRANCH_NAME} -gt $MAX_BRANCH_LENGTH ]; then
+if [ -n "$EXACT_BRANCH_NAME" ] && [ ${#BRANCH_NAME} -gt $MAX_BRANCH_LENGTH ]; then
+    >&2 echo "Error: Exact branch name overrides must be 244 bytes or fewer in UTF-8. Provided value is ${#BRANCH_NAME} bytes."
+    exit 1
+elif [ ${#BRANCH_NAME} -gt $MAX_BRANCH_LENGTH ]; then
     # Calculate how much we need to trim from suffix
     # Account for prefix length: timestamp (15) + hyphen (1) = 16, or sequential (3) + hyphen (1) = 4
     PREFIX_LENGTH=$(( ${#FEATURE_NUM} + 1 ))

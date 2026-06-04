@@ -4,7 +4,7 @@
 
 **Input**: Feature specification from `/specs/[###-feature-name]/spec.md`
 
-**Note**: This template is filled in by the `/speckit.plan` command. See `.specify/templates/plan-template.md` for the execution workflow.
+**Note**: This template is filled in by the `/speckit-plan` command. See `.specify/templates/plan-template.md` for the execution workflow.
 
 ## Summary
 
@@ -13,37 +13,41 @@
 ## Technical Context
 
 <!--
-  ACTION REQUIRED: Replace placeholders with the technical details for this feature.
-  Use the selected stack(s) from spec.md. Delete stack rows and structure examples that do not apply.
+  ACTION REQUIRED: Replace the content in this section with the technical details
+  for the project. The structure here is presented in advisory capacity to guide
+  the iteration process.
 -->
 
-**Feature Type**: [API / Angular UI / Full-stack / Library / Other]
+**Language/Version**: [e.g., Python 3.11, .NET 8, Angular 17/TypeScript, Swift 5.9, Rust 1.75 or NEEDS CLARIFICATION]
 
-**Backend Stack**: [.NET version + C# version / N/A / Other]
+**Primary Dependencies**: [e.g., FastAPI, ASP.NET Core, OData, Microsoft.AspNetCore.Mvc.Testing, Angular, UIKit, LLVM or NEEDS CLARIFICATION]
 
-**Frontend Stack**: [Angular version + TypeScript version / N/A / Other]
+**Storage**: [if applicable, e.g., PostgreSQL, CoreData, files or N/A]
 
-**Primary Dependencies**: [backend packages, Angular libraries, shared SDKs, auth clients]
+**Testing**: [e.g., pytest, dotnet test with Microsoft.AspNetCore.Mvc.Testing/WebApplicationFactory for .NET API/OData contract tests, Angular Karma/Jasmine via ng test --watch=false, XCTest, cargo test or NEEDS CLARIFICATION]
 
-**Storage/State**: [database, browser storage, server cache, client state, N/A]
+**Target Platform**: [e.g., Linux server, iOS 15+, WASM or NEEDS CLARIFICATION]
 
-**Testing**: [backend test framework and command; Angular Karma/Jasmine via `ng test`; E2E tool if required]
+**Project Type**: [e.g., library/cli/web-service/.NET API/OData + Angular web-app/mobile-app/compiler/desktop-app or NEEDS CLARIFICATION]
 
-**Target Platform**: [Linux container, browser support matrix, Azure App Service, Azure Static Web Apps, etc.]
+**Performance Goals**: [domain-specific, e.g., 1000 req/s, 10k lines/sec, 60 fps or NEEDS CLARIFICATION]
 
-**Project Type**: [.NET API / Angular app / Full-stack / Library]
+**Constraints**: [domain-specific, e.g., <200ms p95, <100MB memory, offline-capable or NEEDS CLARIFICATION]
 
-**Performance Goals**: [API latency, UI render budget, bundle budget, interaction budget, or N/A]
-
-**Constraints**: [auth, configuration, browser support, no local state, accessibility, deployment constraints]
-
-**Scale/Scope**: [users, routes, components, endpoints, clients, or NEEDS CLARIFICATION]
+**Scale/Scope**: [domain-specific, e.g., 10k users, 1M LOC, 50 screens or NEEDS CLARIFICATION]
 
 ## Constitution Check
 
 *GATE: Must pass before Phase 0 research. Re-check after Phase 1 design.*
 
-[Gates determined based on constitution file. Include stack-specific gates for contracts, tests, simplicity, and CI commands.]
+[Gates determined based on constitution file]
+
+## Stack-Specific Test Gates
+
+- For .NET API/OData work, plan contract tests for every changed endpoint or OData surface using `Microsoft.AspNetCore.Mvc.Testing` and `WebApplicationFactory`; validation command is `dotnet test`.
+- For .NET backend logic, plan unit tests in the repo's .NET test project(s); validation command is `dotnet test`.
+- For Angular work, plan Karma/Jasmine unit tests in `*.spec.ts`; validation command is `ng test --watch=false`.
+- For non-.NET/non-Angular stacks, follow the repo's existing test policy and tooling.
 
 ## Project Structure
 
@@ -51,82 +55,64 @@
 
 ```text
 specs/[###-feature]/
-├── plan.md              # This file (/speckit.plan command output)
-├── research.md          # Phase 0 output (/speckit.plan command)
-├── data-model.md        # Phase 1 output (/speckit.plan command)
-├── quickstart.md        # Phase 1 output (/speckit.plan command)
-├── contracts/           # Phase 1 output (/speckit.plan command)
-└── tasks.md             # Phase 2 output (/speckit.tasks command - NOT created by /speckit.plan)
+├── plan.md              # This file (/speckit-plan command output)
+├── research.md          # Phase 0 output (/speckit-plan command)
+├── data-model.md        # Phase 1 output (/speckit-plan command)
+├── quickstart.md        # Phase 1 output (/speckit-plan command)
+├── contracts/           # Phase 1 output (/speckit-plan command)
+└── tasks.md             # Phase 2 output (/speckit-tasks command - NOT created by /speckit-plan)
 ```
 
 ### Source Code (repository root)
-
 <!--
-  ACTION REQUIRED: Replace with actual paths for the selected stack(s).
-  Keep only the relevant structure. Do not generate files in paths that do not exist unless the plan explicitly creates them.
+  ACTION REQUIRED: Replace the placeholder tree below with the concrete layout
+  for this feature. Delete unused options and expand the chosen structure with
+  real paths (e.g., apps/admin, packages/something). The delivered plan must
+  not include Option labels.
 -->
 
-#### .NET API structure *(if applicable)*
-
 ```text
-src/[ApiProject]/
-├── Controllers/ or Endpoints/
-├── Models/ or Contracts/
-├── Services/
-└── Program.cs
+# [REMOVE IF UNUSED] Option 1: Single project (DEFAULT)
+src/
+├── models/
+├── services/
+├── cli/
+└── lib/
 
-tests/[ApiProject].Tests/
-├── TestData/[FeatureName]/
-├── Contracts/
-└── Unit/
+tests/
+├── contract/
+├── integration/
+└── unit/
+
+# [REMOVE IF UNUSED] Option 2: Web application (when "frontend" + "backend" detected)
+backend/
+├── src/
+│   ├── models/
+│   ├── services/
+│   └── api/
+└── tests/
+    ├── Contract/        # .NET API/OData contract tests with Microsoft.AspNetCore.Mvc.Testing
+    └── Unit/            # .NET unit tests
+
+frontend/
+├── src/
+│   └── app/
+│       ├── components/
+│       ├── pages/
+│       ├── services/
+│       └── **/*.spec.ts # Angular Karma/Jasmine unit tests
+└── angular.json
+
+# [REMOVE IF UNUSED] Option 3: Mobile + API (when "iOS/Android" detected)
+api/
+└── [same as backend above]
+
+ios/ or android/
+└── [platform-specific structure: feature modules, UI flows, platform tests]
 ```
 
-#### Angular UI structure *(if applicable)*
-
-```text
-src/app/[feature]/
-├── [feature].routes.ts
-├── [feature].component.ts
-├── [feature].component.html
-├── [feature].component.scss
-├── [feature].component.spec.ts
-├── [feature].service.ts
-└── [feature].service.spec.ts
-```
-
-#### Full-stack structure *(if applicable)*
-
-```text
-src/[ApiProject]/                  # Backend API contracts and implementation
-tests/[ApiProject].Tests/          # Backend tests and test data
-src/app/[feature]/                 # Angular route, component, service, and tests
-```
-
-**Test Data Decision**: [Where request/response JSON, UI fixtures, mocks, or builders live. Must match spec.md contracts.]
-
-**Structure Decision**: [Chosen structure and why it is the simplest fit for this feature. Document any additional layer in Complexity Tracking.]
-
-## Phase 0: Research
-
-<!--
-  Resolve unknowns before design. Prefer facts from existing code/config over assumptions.
--->
-
-- [ ] Identify existing project conventions for the selected stack(s)
-- [ ] Confirm test runner commands and CI-compatible flags
-- [ ] Confirm auth, configuration, routing, and state-management patterns
-- [ ] Document decisions in `research.md`
-
-## Phase 1: Design
-
-<!--
-  Produce implementation-ready design artifacts.
--->
-
-- [ ] Define contracts/interfaces in `contracts/` and keep them aligned with `spec.md`
-- [ ] Define data model, DTOs, view models, or component state in `data-model.md`
-- [ ] Define quickstart validation commands in `quickstart.md`
-- [ ] Re-run Constitution Check after design
+**Structure Decision**: [Document the selected structure and reference the real
+directories captured above]
 
 ## Complexity Tracking
 
@@ -134,5 +120,5 @@ src/app/[feature]/                 # Angular route, component, service, and test
 
 | Violation | Why Needed | Simpler Alternative Rejected Because |
 |-----------|------------|-------------------------------------|
-| [e.g., extra layer/project/library] | [current need] | [why the simpler structure is insufficient] |
-| [e.g., new state-management library] | [specific problem] | [why existing patterns are insufficient] |
+| [e.g., 4th project] | [current need] | [why 3 projects insufficient] |
+| [e.g., Repository pattern] | [specific problem] | [why direct DB access insufficient] |

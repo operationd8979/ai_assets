@@ -1,2 +1,0 @@
-1.phan biet 2 loai handle click for labels or label of dataset
-2.add guide for expandable table widget

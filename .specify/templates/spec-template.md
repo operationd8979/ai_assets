@@ -8,10 +8,6 @@
 
 **Input**: User description: "$ARGUMENTS"
 
-**Feature Type**: [API / Angular UI / Full-stack / Library / Other]
-
-**Primary Stack(s)**: [.NET API / Angular / Other - list all that apply]
-
 ## User Scenarios & Testing *(mandatory)*
 
 <!--
@@ -75,19 +71,18 @@
 ### Edge Cases
 
 <!--
-  ACTION REQUIRED: Replace these placeholders with edge cases relevant to the selected stack(s).
-  Include API validation and error cases for backend features.
-  Include UI states, async loading, empty states, browser behavior, and accessibility cases for Angular features.
+  ACTION REQUIRED: The content in this section represents placeholders.
+  Fill them out with the right edge cases.
 -->
 
 - What happens when [boundary condition]?
-- How does the system handle [error scenario]?
+- How does system handle [error scenario]?
 
 ## Requirements *(mandatory)*
 
 <!--
-  ACTION REQUIRED: Replace the content in this section with the right functional requirements.
-  Requirements must describe product behavior, not framework implementation details.
+  ACTION REQUIRED: The content in this section represents placeholders.
+  Fill them out with the right functional requirements.
 -->
 
 ### Functional Requirements
@@ -125,129 +120,12 @@
 ## Assumptions
 
 <!--
-  ACTION REQUIRED: Fill this section with explicit defaults chosen when the feature description did not specify details.
+  ACTION REQUIRED: The content in this section represents placeholders.
+  Fill them out with the right assumptions based on reasonable defaults
+  chosen when the feature description did not specify certain details.
 -->
 
 - [Assumption about target users, e.g., "Users have stable internet connectivity"]
 - [Assumption about scope boundaries, e.g., "Mobile support is out of scope for v1"]
 - [Assumption about data/environment, e.g., "Existing authentication system will be reused"]
 - [Dependency on existing system/service, e.g., "Requires access to the existing user profile API"]
-
-## Contracts & Interfaces *(mandatory)*
-
-<!--
-  This section is the single source of truth for externally visible behavior.
-  Fill only the blocks that apply to this feature type. Delete unused blocks before committing.
-
-  API features: define exact HTTP contracts.
-  Angular UI features: define routes, user-visible states, component inputs/outputs, and service dependencies.
-  Full-stack features: define both API and UI contracts plus how the UI consumes the API.
--->
-
-### API Contract *(for API or full-stack features)*
-
-#### `[METHOD] /api/[resource]/[route]`
-
-**Auth required**: Yes - [auth scheme] / No
-
-**Path params**: `{paramName}` (type, required) - description / N/A
-
-**Query params**: `?param` (type, optional) - description / N/A
-
-**Request body**:
-
-```json
-{
-  "field": "type - description"
-}
-```
-
-*(N/A for requests without a body)*
-
-**Success response**:
-
-```json
-{
-  "field": "value"
-}
-```
-
-**Error responses**:
-
-| Status | Condition | Response body |
-|--------|-----------|---------------|
-| [status] | [condition] | `[body or N/A]` |
-
-**Test data files**:
-
-- `[path/to/feature]/test-data/[scenario]-request.json`
-- `[path/to/feature]/test-data/[scenario]-response.json`
-
-**Breaking change**: No / Yes - migration: [describe migration path]
-
----
-
-### Angular UI Contract *(for Angular UI or full-stack features)*
-
-**Route(s)**: `[path]` - [purpose and navigation entry point]
-
-**Primary component/view**: `[ComponentName]` - [responsibility]
-
-**Inputs**: `[inputName]` (type, required/optional) - description / N/A
-
-**Outputs/events**: `[eventName]` (payload type) - description / N/A
-
-**Service/API dependencies**: `[service or endpoint]` - [expected contract and failure behavior]
-
-**User-visible states**:
-
-| State | Trigger | Expected UI behavior |
-|-------|---------|----------------------|
-| Loading | [trigger] | [spinner/skeleton/disabled controls/etc.] |
-| Empty | [trigger] | [empty state content and available actions] |
-| Error | [trigger] | [message, retry behavior, and focus/announcement behavior] |
-| Success | [trigger] | [rendered data and next action] |
-
-**Accessibility/responsive requirements**:
-
-- Keyboard access: [required focus order and key behavior]
-- Screen reader behavior: [labels, live regions, announcements]
-- Responsive behavior: [mobile/tablet/desktop expectations]
-
-**Breaking change**: No / Yes - migration: [describe migration path]
-
----
-
-### Integration Contract *(for cross-system or full-stack features)*
-
-**Producer**: [system/component/API]
-
-**Consumer**: [system/component/API/UI]
-
-**Data exchanged**: [schema, event, route params, query params, or payload]
-
-**Failure handling**: [retry, fallback, error state, logging, or user message]
-
-**Compatibility requirements**: [versioning, backward compatibility, feature flags, rollout]
-
-## Test Coverage *(mandatory)*
-
-<!--
-  One row per Acceptance Scenario defined above.
-  Keep this table updated whenever contracts or scenarios change.
-  Status: [ ] = not yet implemented, [x] = passing, [!] = failing/blocking
-
-  Test type must match the selected stack:
-  - API: contract/integration test, unit test, authorization test
-  - Angular: component test, service test, route test, accessibility/responsive check
-  - Full-stack: API contract test plus UI integration/component test
--->
-
-| # | Scenario | Contract/interface covered | Test type | Test file or command | Status |
-|---|----------|----------------------------|-----------|----------------------|--------|
-| 1 | Happy path - [describe] | [API endpoint or UI contract] | [test type] | `[path or command]` | [ ] |
-| 2 | Edge case - [describe] | [API endpoint or UI contract] | [test type] | `[path or command]` | [ ] |
-| 3 | Invalid input or invalid state | [API endpoint or UI contract] | [test type] | `[path or command]` | [ ] |
-| 4 | Unauthorized or unavailable dependency | [API endpoint or UI contract] | [test type] | `[path or command]` | [ ] |
-
-*Add a row for every Acceptance Scenario in the User Stories section. Test names and file paths MUST match the implementation plan and tasks.*
